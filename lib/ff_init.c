@@ -30,6 +30,8 @@
 #include "ff_config.h"
 #include "ff_dpdk_if.h"
 
+#include "ff_rss.h"
+
 extern int ff_freebsd_init();
 
 int
@@ -52,6 +54,7 @@ ff_init(int argc, char * const argv[])
     if (ret < 0)
         exit(1);
 
+	ff_rss_init();
     return 0;
 }
 
