@@ -60,6 +60,8 @@ void ff_dpdk_set_if(struct ff_dpdk_if_context *ctx, void *sc, void *ifp);
 int ff_dpdk_if_send(struct ff_dpdk_if_context* ctx, void *buf, int total);
 
 void ff_dpdk_pktmbuf_free(void *m);
+uint32_t toeplitz_hash(unsigned keylen, const uint8_t *key,
+    unsigned datalen, const uint8_t *data);
 
 
 #endif /* ifndef _FSTACK_DPDK_IF_H */

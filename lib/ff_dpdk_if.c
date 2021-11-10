@@ -110,8 +110,8 @@ static uint8_t symmetric_rsskey[52] = {
     0x6d, 0x5a, 0x6d, 0x5a
 };
 
-static int rsskey_len = sizeof(default_rsskey_40bytes);
-static uint8_t *rsskey = default_rsskey_40bytes;
+int rsskey_len = sizeof(default_rsskey_40bytes);
+uint8_t *rsskey = default_rsskey_40bytes;
 
 struct lcore_conf lcore_conf;
 
@@ -622,29 +622,31 @@ init_port_start(void)
             rte_memcpy(pconf->mac,
                 addr.addr_bytes, RTE_ETHER_ADDR_LEN);
 
-            /* Set RSS mode */
-            uint64_t default_rss_hf = ETH_RSS_PROTO_MASK;
-            port_conf.rxmode.mq_mode = ETH_MQ_RX_RSS;
-            port_conf.rx_adv_conf.rss_conf.rss_hf = default_rss_hf;
-            if (dev_info.hash_key_size == 52) {
-                rsskey = default_rsskey_52bytes;
-                rsskey_len = 52;
-            }
-            if (ff_global_cfg.dpdk.symmetric_rss) {
-                printf("Use symmetric Receive-side Scaling(RSS) key\n");
-                rsskey = symmetric_rsskey;
-            }
-            port_conf.rx_adv_conf.rss_conf.rss_key = rsskey;
-            port_conf.rx_adv_conf.rss_conf.rss_key_len = rsskey_len;
-            port_conf.rx_adv_conf.rss_conf.rss_hf &= dev_info.flow_type_rss_offloads;
-            if (port_conf.rx_adv_conf.rss_conf.rss_hf !=
-                    ETH_RSS_PROTO_MASK) {
-                printf("Port %u modified RSS hash function based on hardware support,"
-                        "requested:%#"PRIx64" configured:%#"PRIx64"\n",
-                        port_id, default_rss_hf,
-                        port_conf.rx_adv_conf.rss_conf.rss_hf);
-            }
-
+			if (strncmp(dev_info.driver_name, "net_virtio", strlen("net_virtio"))) {
+	            /* Set RSS mode */
+	            uint64_t default_rss_hf = ETH_RSS_PROTO_MASK;
+	            port_conf.rxmode.mq_mode = ETH_MQ_RX_RSS;
+	            port_conf.rx_adv_conf.rss_conf.rss_hf = default_rss_hf;
+	            if (dev_info.hash_key_size == 52) {
+	                rsskey = default_rsskey_52bytes;
+	                rsskey_len = 52;
+	            }
+	            if (ff_global_cfg.dpdk.symmetric_rss) {
+	                printf("Use symmetric Receive-side Scaling(RSS) key\n");
+	                rsskey = symmetric_rsskey;
+	            }
+	            port_conf.rx_adv_conf.rss_conf.rss_key = rsskey;
+	            port_conf.rx_adv_conf.rss_conf.rss_key_len = rsskey_len;
+	            port_conf.rx_adv_conf.rss_conf.rss_hf &= dev_info.flow_type_rss_offloads;
+	            if (port_conf.rx_adv_conf.rss_conf.rss_hf !=
+	                    ETH_RSS_PROTO_MASK) {
+	                printf("Port %u modified RSS hash function based on hardware support,"
+	                        "requested:%#"PRIx64" configured:%#"PRIx64"\n",
+	                        port_id, default_rss_hf,
+	                        port_conf.rx_adv_conf.rss_conf.rss_hf);
+	            }
+			}
+			
             if (dev_info.tx_offload_capa & DEV_TX_OFFLOAD_MBUF_FAST_FREE) {
                 port_conf.txmode.offloads |=
                     DEV_TX_OFFLOAD_MBUF_FAST_FREE;
@@ -1983,7 +1985,7 @@ ff_dpdk_pktmbuf_free(void *m)
     rte_pktmbuf_free_seg((struct rte_mbuf *)m);
 }
 
-static uint32_t
+uint32_t
 toeplitz_hash(unsigned keylen, const uint8_t *key,
     unsigned datalen, const uint8_t *data)
 {

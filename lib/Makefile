@@ -50,7 +50,7 @@ endif
 
 PKGCONF ?= pkg-config
 
-DPDK_CFLAGS= -Wall -Wno-deprecated-declarations -Werror $(shell $(PKGCONF) --cflags libdpdk)
+DPDK_CFLAGS= -O3 -Wall -Wno-deprecated-declarations -Werror $(shell $(PKGCONF) --cflags libdpdk)
 
 KERNPREINCLUDES:= ${INCLUDES}
 INCLUDES= -I${OVERRIDE_INCLUDES_ROOT} ${KERNPREINCLUDES}
@@ -60,7 +60,7 @@ INCLUDES+= -I./opt
 # Include search path for files that only include host OS headers
 HOST_INCLUDES= -I.
 ifndef DEBUG
-HOST_CFLAGS = -O2 -frename-registers  -funswitch-loops -fweb -Wno-format-truncation
+HOST_CFLAGS = -O3 -frename-registers  -funswitch-loops -fweb -Wno-format-truncation -Wno-maybe-uninitialized
 else
 HOST_CFLAGS = ${DEBUG} 
 endif
@@ -227,7 +227,9 @@ FF_HOST_SRCS+=              \
 	ff_dpdk_if.c        \
 	ff_dpdk_pcap.c      \
 	ff_epoll.c          \
-	ff_init.c	
+	ff_rss.c	    \
+	ff_net.c            \
+	ff_init.c
 
 ifdef FF_KNI
 FF_HOST_SRCS+=              \
